@@ -509,13 +509,13 @@
 
   <footer>
     Powered by <strong>SymPy</strong> &amp; <strong>KaTeX</strong> &nbsp;·&nbsp;
-    Backend: <code>app.py</code> on <code>localhost:5000</code>
+    Backend: <code>app.py</code> on <code> </code>
   </footer>
 
 </main>
 
 <script>
-const API = "http://localhost:5000";
+const API = " ";
 let integralType = "indefinite";
 let previewTimer = null;
 
@@ -631,7 +631,7 @@ async function calculate() {
     const data = await res.json();
     renderSolution(data);
   } catch {
-    renderError("Could not connect to backend. Make sure <strong>app.py</strong> is running on <code>localhost:5000</code>.");
+    renderError("Could not connect to backend. Make sure <strong>app.py</strong> is running on <code> </code>.");
   } finally {
     btn.classList.remove("loading"); btn.disabled = false;
   }
