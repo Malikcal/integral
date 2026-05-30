@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integral Calculator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f4f6fb;
+      --surface:     #ffffff;
+      --surface2:    #f8f9fc;
+      --border:      #dde3ef;
+      --border-lt:   #eef1f8;
+      --text:        #0d1b3e;
+      --text-mid:    #3a4a72;
+      --text-muted:  #7480a0;
+      --primary:     #1a4fd6;
+      --primary-dk:  #1240b0;
+      --primary-lt:  #eef2fd;
+      --primary-mid: #c5d4f8;
+      --accent:      #0ea5e9;
+      --accent-lt:   #e0f5fe;
+      --green:       #16a34a;
+      --green-lt:    #dcfce7;
+      --radius:      10px;
+      --radius-lg:   14px;
+      --shadow:      0 1px 4px rgba(26,79,214,.07), 0 4px 16px rgba(26,79,214,.05);
+      --shadow-md:   0 2px 8px rgba(26,79,214,.10), 0 8px 24px rgba(26,79,214,.07);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ───── HEADER ───── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 16px rgba(26,79,214,.35);
+    }
+    .header-inner {
+      max-width: 900px; margin: 0 auto;
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .logo {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,.18);
+      border: 1.5px solid rgba(255,255,255,.3);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .header-text h1 { font-size: 18px; font-weight: 800; letter-spacing: -.3px; }
+    .header-text p  { font-size: 12px; opacity: .75; margin-top: 1px; }
+
+    /* ───── MAIN ───── */
+    main {
+      max-width: 900px; margin: 0 auto;
+      padding: 30px 24px 80px;
+      display: flex; flex-direction: column; gap: 22px;
+    }
+
+    /* ───── CARD ───── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+    .card-header {
+      padding: 18px 24px 10px;
+      border-bottom: 1px solid var(--border-lt);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-header .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--primary-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .card-header h2 { font-size: 14px; font-weight: 700; color: var(--text); }
+    .card-header p  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .card-body { padding: 18px 24px 22px; }
+
+    /* ───── FUNCTION PANEL ───── */
+    .fn-panel {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .fn-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 52px;
+      background: var(--primary-lt);
+      border: 1.5px solid var(--primary-mid);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+      transition: background .12s, border-color .12s, transform .08s;
+    }
+    .fn-btn:hover  { background: var(--primary); color: #fff; border-color: var(--primary-dk); }
+    .fn-btn:active { transform: scale(.95); }
+    .fn-section-label {
+      width: 100%; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--text-muted); margin: 8px 0 4px;
+    }
+    .fn-section-label:first-child { margin-top: 0; }
+
+    /* ───── FORM ───── */
+    .field-label {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 7px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .badge {
+      font-size: 11px; font-weight: 500;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 999px; padding: 1px 8px; color: var(--text-muted);
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,79,214,.12);
+    }
+    .input-hint {
+      font-size: 12px; color: var(--text-muted); margin-top: 5px;
+    }
+    .input-hint code {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 5px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    }
+
+    /* ───── PREVIEW BOX ───── */
+    .preview-box {
+      min-height: 52px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex; align-items: center;
+      gap: 10px;
+      transition: border-color .15s;
+    }
+    .preview-box.active { border-color: var(--primary-mid); background: var(--primary-lt); }
+    .preview-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--text-muted); flex-shrink: 0;
+    }
+    .preview-math { flex: 1; overflow-x: auto; }
+    .preview-math .katex { font-size: 1.2rem; }
+
+    /* ───── BOUNDS ROW ───── */
+    .bounds-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+    }
+    @media (max-width: 560px) { .bounds-row { grid-template-columns: 1fr 1fr; } }
+
+    /* ───── INTEGRAL TYPE TOGGLE ───── */
+    .type-toggle { display: flex; gap: 10px; margin-bottom: 18px; }
+    .type-btn {
+      flex: 1; padding: 10px;
+      border: 2px solid var(--border); border-radius: 9px;
+      background: var(--surface);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      text-align: center; transition: all .15s;
+    }
+    .type-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-lt);
+      color: var(--primary);
+    }
+    .type-btn:hover:not(.active) { border-color: rgba(26,79,214,.4); }
+
+    /* ───── CALCULATE BUTTON ───── */
+    .btn-calc {
+      width: 100%; height: 52px;
+      background: var(--primary);
+      color: #fff;
+      border: none; border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 3px 14px rgba(26,79,214,.35);
+      transition: background .15s, opacity .15s, transform .08s;
+    }
+    .btn-calc:hover  { background: var(--primary-dk); }
+    .btn-calc:active { transform: scale(.99); }
+    .btn-calc:disabled { opacity: .6; cursor: not-allowed; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    .btn-calc.loading .spinner { display: block; }
+    .btn-calc.loading .btn-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ───── SOLUTION PAGE ───── */
+    .solution-page {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 36px 40px 40px;
+    }
+    @media (max-width: 600px) { .solution-page { padding: 24px 18px 28px; } }
+
+    .solution-title {
+      font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: var(--text-muted);
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1.5px solid var(--border-lt);
+    }
+    .solution-title::before {
+      content: ""; display: block;
+      width: 4px; height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    /* Each step is a plain text+math block, textbook style */
+    .sol-step {
+      margin-bottom: 22px;
+    }
+    .sol-step-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 5px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .sol-step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary-lt);
+      border: 1.5px solid var(--primary-mid);
+      font-size: 11px; font-weight: 800;
+      color: var(--primary);
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sol-step-desc {
+      font-size: 13.5px; color: var(--text-mid);
+      margin-bottom: 9px; line-height: 1.65;
+    }
+    .sol-math-line {
+      display: block;
+      margin: 6px 0;
+      overflow-x: auto;
+      padding: 2px 0;
+    }
+    .sol-math-line .katex-display { margin: 0 !important; }
+    .sol-math-line .katex { font-size: 1.15rem; }
+
+    .sol-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 22px 0;
+    }
+
+    /* Final answer */
+    .final-answer-block {
+      margin-top: 10px;
+      border-top: 2px solid var(--border);
+      padding-top: 24px;
+    }
+    .final-answer-label {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .12em;
+      color: var(--text-muted); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .final-answer-label::after {
+      content: ""; flex: 1; height: 1px; background: var(--border-lt);
+    }
+    .final-answer-math {
+      background: linear-gradient(135deg, var(--primary-lt) 0%, #fff 100%);
+      border: 2px solid var(--primary-mid);
+      border-radius: 12px;
+      padding: 20px 28px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(26,79,214,.09);
+      overflow-x: auto;
+    }
+    .final-answer-math .katex { font-size: 1.7rem; }
+
+    .c-note {
+      margin-top: 12px;
+      background: var(--accent-lt);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 16px;
+      font-size: 13px; color: var(--text-mid);
+    }
+    .c-note strong { color: var(--text); }
+
+    /* ───── ERROR ───── */
+    .error-box {
+      background: #fff5f5; border: 1.5px solid #fca5a5;
+      border-radius: 10px; padding: 16px 20px;
+      color: #b91c1c; font-size: 14px; font-weight: 500;
+    }
+
+    /* ───── FOOTER ───── */
+    footer {
+      text-align: center; font-size: 12px; color: var(--text-muted);
+      padding: 6px 0 2px;
+    }
+    footer code { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">∫</div>
+    <div class="header-text">
+      <h1>Integral Calculator</h1>
+      <p>Symbolic integration with full step-by-step solutions</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Function Panel -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">⌨</div>
+      <div>
+        <h2>Function Panel</h2>
+        <p>Click any symbol to insert it into the input field</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="fn-panel" id="fn-panel">
+
+        <div class="fn-section-label">Basic</div>
+        <button class="fn-btn" data-insert="x^2">x²</button>
+        <button class="fn-btn" data-insert="x^3">x³</button>
+        <button class="fn-btn" data-insert="x^n">xⁿ</button>
+        <button class="fn-btn" data-insert="1/x">1/x</button>
+        <button class="fn-btn" data-insert="sqrt(x)">√x</button>
+        <button class="fn-btn" data-insert="x^(1/2)">x^½</button>
+        <button class="fn-btn" data-insert="(">( </button>
+        <button class="fn-btn" data-insert=")"> )</button>
+        <button class="fn-btn" data-insert="^">^</button>
+        <button class="fn-btn" data-insert="*">×</button>
+        <button class="fn-btn" data-insert="/">/</button>
+
+        <div class="fn-section-label">Exponential & Logarithm</div>
+        <button class="fn-btn" data-insert="exp(x)">eˣ</button>
+        <button class="fn-btn" data-insert="exp(2*x)">e²ˣ</button>
+        <button class="fn-btn" data-insert="2^x">2ˣ</button>
+        <button class="fn-btn" data-insert="log(x)">ln(x)</button>
+        <button class="fn-btn" data-insert="log(x**2)">ln(x²)</button>
+        <button class="fn-btn" data-insert="log(2*x)">ln(2x)</button>
+
+        <div class="fn-section-label">Trigonometric</div>
+        <button class="fn-btn" data-insert="sin(x)">sin x</button>
+        <button class="fn-btn" data-insert="cos(x)">cos x</button>
+        <button class="fn-btn" data-insert="tan(x)">tan x</button>
+        <button class="fn-btn" data-insert="sec(x)">sec x</button>
+        <button class="fn-btn" data-insert="csc(x)">csc x</button>
+        <button class="fn-btn" data-insert="cot(x)">cot x</button>
+        <button class="fn-btn" data-insert="sin(x)^2">sin²x</button>
+        <button class="fn-btn" data-insert="cos(x)^2">cos²x</button>
+        <button class="fn-btn" data-insert="sin(2*x)">sin 2x</button>
+        <button class="fn-btn" data-insert="cos(3*x)">cos 3x</button>
+
+        <div class="fn-section-label">Inverse Trig</div>
+        <button class="fn-btn" data-insert="asin(x)">arcsin</button>
+        <button class="fn-btn" data-insert="acos(x)">arccos</button>
+        <button class="fn-btn" data-insert="atan(x)">arctan</button>
+
+        <div class="fn-section-label">Hyperbolic</div>
+        <button class="fn-btn" data-insert="sinh(x)">sinh</button>
+        <button class="fn-btn" data-insert="cosh(x)">cosh</button>
+        <button class="fn-btn" data-insert="tanh(x)">tanh</button>
+
+        <div class="fn-section-label">Polynomials</div>
+        <button class="fn-btn" data-insert="3*x^2 + 2*x + 1">3x²+2x+1</button>
+        <button class="fn-btn" data-insert="x^4 - x^2">x⁴−x²</button>
+        <button class="fn-btn" data-insert="x^3 - 3*x + 2">x³−3x+2</button>
+
+        <div class="fn-section-label">Special</div>
+        <button class="fn-btn" data-insert="1/(1+x^2)">1/(1+x²)</button>
+        <button class="fn-btn" data-insert="1/sqrt(1-x^2)">1/√(1−x²)</button>
+        <button class="fn-btn" data-insert="x*exp(x)">x·eˣ</button>
+        <button class="fn-btn" data-insert="x*log(x)">x·ln x</button>
+        <button class="fn-btn" data-insert="x*sin(x)">x·sin x</button>
+        <button class="fn-btn" data-insert="exp(-x^2)">e^(−x²)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🧮</div>
+      <div>
+        <h2>Input</h2>
+        <p>Enter the function you want to integrate</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- Integral type -->
+      <div class="type-toggle">
+        <button class="type-btn active" id="btn-indef" onclick="setType('indefinite')">
+          Indefinite &nbsp; ∫ f(x) dx
+        </button>
+        <button class="type-btn" id="btn-def" onclick="setType('definite')">
+          Definite &nbsp; ∫ₐᵇ f(x) dx
+        </button>
+      </div>
+
+      <!-- Function input -->
+      <div style="margin-bottom:16px">
+        <div class="field-label">f(x) — Function to Integrate</div>
+        <input type="text" id="func-input" value="x^2"
+               placeholder="e.g. x^2, sin(x), exp(x)*x, 3*x^2 + 2*x"
+               autocomplete="off"
+               oninput="debouncedPreview()"
+               onkeydown="if(event.key==='Enter') calculate()" />
+        <div class="input-hint">
+          Use <code>^</code> for powers &nbsp;·&nbsp; <code>*</code> for multiply &nbsp;·&nbsp;
+          <code>exp(x)</code> for eˣ &nbsp;·&nbsp; <code>log(x)</code> or <code>ln(x)</code>
+          &nbsp;·&nbsp; <code>sqrt(x)</code>
+        </div>
+      </div>
+
+      <!-- Live preview -->
+      <div style="margin-bottom:18px">
+        <div class="field-label">Interpreted As</div>
+        <div class="preview-box" id="preview-box">
+          <span class="preview-label">f(x) =</span>
+          <div class="preview-math" id="preview-math"></div>
+        </div>
+      </div>
+
+      <!-- Bounds + variable row -->
+      <div class="bounds-row">
+        <div>
+          <div class="field-label">Variable</div>
+          <input type="text" id="var-input" value="x" maxlength="2"
+                 placeholder="x" style="text-align:center" />
+        </div>
+        <div id="lower-group">
+          <div class="field-label">Lower Bound <span class="badge">definite</span></div>
+          <input type="text" id="lower-input" placeholder="e.g. 0" disabled />
+        </div>
+        <div id="upper-group">
+          <div class="field-label">Upper Bound <span class="badge">definite</span></div>
+          <input type="text" id="upper-input" placeholder="e.g. 1" disabled />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculate -->
+  <button class="btn-calc" id="calc-btn" onclick="calculate()">
+    <span class="btn-label">∫ &nbsp; Calculate Integral</span>
+    <span class="spinner" id="spinner"></span>
+  </button>
+
+  <!-- Solution area -->
+  <div id="solution-area"></div>
+
+  <footer>
+    Powered by <strong>SymPy</strong> &amp; <strong>KaTeX</strong> &nbsp;·&nbsp;
+    Backend: <code>app.py</code> on <code>localhost:5000</code>
+  </footer>
+
+</main>
+
+<script>
+const API = "http://localhost:5000";
+let integralType = "indefinite";
+let previewTimer = null;
+
+// ── Insert from function panel ──
+document.querySelectorAll(".fn-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const inp = document.getElementById("func-input");
+    const val = btn.dataset.insert;
+    const start = inp.selectionStart;
+    const end   = inp.selectionEnd;
+    inp.value = inp.value.slice(0, start) + val + inp.value.slice(end);
+    inp.selectionStart = inp.selectionEnd = start + val.length;
+    inp.focus();
+    debouncedPreview();
+  });
+});
+
+// ── Toggle definite / indefinite ──
+function setType(type) {
+  integralType = type;
+  document.getElementById("btn-indef").classList.toggle("active", type === "indefinite");
+  document.getElementById("btn-def").classList.toggle("active",   type === "definite");
+  const disabled = type === "indefinite";
+  document.getElementById("lower-input").disabled = disabled;
+  document.getElementById("upper-input").disabled = disabled;
+  document.getElementById("lower-input").style.opacity = disabled ? ".45" : "1";
+  document.getElementById("upper-input").style.opacity = disabled ? ".45" : "1";
+  debouncedPreview();
+}
+
+// ── Live preview ──
+function debouncedPreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(fetchPreview, 350);
+}
+
+async function fetchPreview() {
+  const funcStr = document.getElementById("func-input").value.trim();
+  const varStr  = document.getElementById("var-input").value.trim() || "x";
+  if (!funcStr) { setPreview("", false); return; }
+
+  try {
+    const res = await fetch(`${API}/api/preview`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ function: funcStr, variable: varStr })
+    });
+    const data = await res.json();
+    setPreview(data.latex || funcStr, data.success !== false);
+  } catch {
+    setPreview(funcStr, false);
+  }
+}
+
+function setPreview(latexStr, ok) {
+  const box  = document.getElementById("preview-box");
+  const math = document.getElementById("preview-math");
+  if (!latexStr) { math.innerHTML = ""; box.classList.remove("active"); return; }
+  box.classList.toggle("active", ok);
+  try {
+    math.innerHTML = katex.renderToString(latexStr, { displayMode: false, throwOnError: false });
+  } catch { math.textContent = latexStr; }
+}
+
+// ── KaTeX helper ──
+function K(latex, display = false) {
+  try {
+    return katex.renderToString(latex, { displayMode: display, throwOnError: false, strict: false });
+  } catch { return `<span style="color:#c00">${latex}</span>`; }
+}
+
+// ── Wait for KaTeX then init ──
+function onKatexReady(fn) {
+  if (typeof katex !== "undefined") { fn(); return; }
+  const check = setInterval(() => {
+    if (typeof katex !== "undefined") { clearInterval(check); fn(); }
+  }, 50);
+}
+
+onKatexReady(() => {
+  fetchPreview();
+  setType("indefinite");
+});
+
+// ── Calculate ──
+async function calculate() {
+  const funcStr  = document.getElementById("func-input").value.trim();
+  const varStr   = document.getElementById("var-input").value.trim() || "x";
+  const lowerStr = document.getElementById("lower-input").value.trim();
+  const upperStr = document.getElementById("upper-input").value.trim();
+
+  if (!funcStr) { alert("Please enter a function."); return; }
+  if (integralType === "definite" && (!lowerStr || !upperStr)) {
+    alert("Please enter both lower and upper bounds for a definite integral.");
+    return;
+  }
+
+  const btn = document.getElementById("calc-btn");
+  btn.classList.add("loading"); btn.disabled = true;
+
+  const payload = { function: funcStr, variable: varStr };
+  if (integralType === "definite") {
+    payload.lower = lowerStr;
+    payload.upper = upperStr;
+  }
+
+  try {
+    const res  = await fetch(`${API}/api/integrate`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    renderSolution(data);
+  } catch {
+    renderError("Could not connect to backend. Make sure <strong>app.py</strong> is running on <code>localhost:5000</code>.");
+  } finally {
+    btn.classList.remove("loading"); btn.disabled = false;
+  }
+}
+
+// ── Render solution ──
+function renderError(msg) {
+  document.getElementById("solution-area").innerHTML =
+    `<div class="error-box">⚠ ${msg}</div>`;
+}
+
+function renderSolution(data) {
+  if (!data.success) { renderError(data.error || "Unknown error."); return; }
+
+  let html = `<div class="solution-page">`;
+  html += `<div class="solution-title">Step-by-Step Solution</div>`;
+
+  // Render each step as flowing text + math
+  data.steps.forEach((step, i) => {
+    html += `<div class="sol-step">`;
+    html += `
+      <div class="sol-step-title">
+        <span class="sol-step-num">${i + 1}</span>
+        ${step.title}
+      </div>`;
+
+    if (step.description) {
+      html += `<div class="sol-step-desc">${step.description}</div>`;
+    }
+
+    if (step.latex) {
+      // Multi-line latex separated by \\
+      const lines = step.latex.split("\\\\").map(l => l.trim()).filter(Boolean);
+      lines.forEach(line => {
+        html += `<div class="sol-math-line">${K(line, true)}</div>`;
+      });
+    }
+
+    html += `</div>`;
+
+    // Add a light divider between steps (but not last)
+    if (i < data.steps.length - 1) {
+      html += `<hr class="sol-divider" />`;
+    }
+  });
+
+  // Final answer block
+  html += `
+    <div class="final-answer-block">
+      <div class="final-answer-label">Final Answer</div>
+      <div class="final-answer-math">${K(`\\boxed{${data.finalLatex}}`, true)}</div>`;
+
+  if (data.isIndefinite) {
+    html += `
+      <div class="c-note">
+        <strong>Note on C:</strong> This is an indefinite integral.
+        The constant <em>C</em> (called the <em>constant of integration</em>) represents
+        any fixed value, since differentiating any constant gives zero.
+        All antiderivatives of this function differ by a constant.
+      </div>`;
+  }
+
+  html += `</div></div>`;
+
+  document.getElementById("solution-area").innerHTML = html;
+  document.getElementById("solution-area").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+</script>
+</body>
+</html>
