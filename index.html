@@ -559,7 +559,7 @@ async function fetchPreview() {
   if (!funcStr) { setPreview("", false); return; }
 
   try {
-    const res = await fetch(`${API}/api/preview`, {
+    const res = await fetch(`${API}/preview`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ function: funcStr, variable: varStr })
