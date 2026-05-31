@@ -515,7 +515,7 @@
 </main>
 
 <script>
-const API = "https://integral-git-main-malikcals-projects.vercel.app";
+const API = "";
 ";
 let integralType = "indefinite";
 let previewTimer = null;
@@ -559,7 +559,7 @@ async function fetchPreview() {
   if (!funcStr) { setPreview("", false); return; }
 
   try {
-    const res = await fetch(`${API}/api/preview`, {
+    const res = await fetch(`/api/preview`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ function: funcStr, variable: varStr })
@@ -597,7 +597,7 @@ function onKatexReady(fn) {
 }
 
 onKatexReady(() => {
-  fetchPreview();
+  fetchPreview('/api/preview',);
   setType("indefinite");
 });
 
