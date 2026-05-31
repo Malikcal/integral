@@ -597,7 +597,7 @@ function onKatexReady(fn) {
 }
 
 onKatexReady(() => {
-  fetchPreview('/api/preview',);
+  fetchPreview();
   setType("indefinite");
 });
 
@@ -624,7 +624,7 @@ async function calculate() {
   }
 
   try {
-    const res  = await fetch(`${API}/api/integrate`, {
+    const res  = await fetch(`/api/integrate`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(payload)
